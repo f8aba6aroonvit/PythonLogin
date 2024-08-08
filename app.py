@@ -8,8 +8,10 @@ import jwt
 import datetime
 from datetime import timedelta
 import re
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  # ตั้งค่าเวลาหมดอายุของ Access Token
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)  
 app.config['SECRET_KEY'] = 'asjdakdsfasasgdagdastdahdrvwq6dyw26347273hsdvdfsr4y23ytg34gf'
@@ -27,7 +29,9 @@ print("dkfjgjsdkfdsjfksflksfj",db)
 
 @app.route("/api/user",methods=['GET'])
 def read():
+    
     try:
+        
         cursor = db.connection.cursor()
         sql = "SELECT*FROM users"
         cursor.execute(sql)
@@ -70,7 +74,6 @@ def register():
         if not email_regex.match(email):
             return jsonify({'message': 'กรอก Email ให้ถูก Format'})
 
-        
         if result:
             return jsonify({'message': 'มีผู้ใช้ในระบบแล้ว'})
 
@@ -86,13 +89,15 @@ def register():
    
 @app.route("/api/user/login",methods=['POST'])
 def login():
-    auth = request.json
 
     try:
+        auth = request.json
         if not auth or not auth.get('username') or not auth.get('password'):
             return jsonify({'message': 'กรุณรากรอกข้อมูลให้ครบ'}), 401
         username = auth.get('username')
         password = auth.get('password')
+
+    
         role = auth.get('role')
 
         sql = "SELECT * FROM users WHERE username = %s AND password = %s"
@@ -100,28 +105,30 @@ def login():
         cursor.execute(sql, (username, password))
         user = cursor.fetchone()
 
+        if not user or not password == password:
+            return jsonify({'message': 'Movie Dog'}), 401
+
+
         if user:
             token = jwt.encode({
                 'role': user[5],
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
             }, app.config['SECRET_KEY'], algorithm='HS256')
-
+      
         return jsonify({
             'role':user[5],
             'token': token})
 
     except:
-        return "หนังหมาไอ้สัส"
-
-
-
-
+         return "หนังหมาไอ้สัส มันเป็นความผิดของมึงดีเคต"
     
 
-
-
-
-
+@app.route("/api/user/edit",methods=['PUT'])
+def edit():
+    try:
+        return "หนังหมี"
+    except:
+        return "หนังหมาไอ้สัส"
 
 
 
